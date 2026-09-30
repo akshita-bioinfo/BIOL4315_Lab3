@@ -24,3 +24,69 @@ You can add options to executable code like this
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
+
+## Assembly overview
+
+r code chunk that tabulates the alignment statistics
+
+```{r}
+alignment_statistics <- data.frame(
+  Statistic = c(
+    "Total length",
+    "N50",
+    "Number of contigs",
+    "Largest contig",
+    "coverage"
+   ),
+  Results = c(
+    10200725,
+    28892,
+    431,
+    85071,
+    6
+  )
+)
+alignment_statistics
+```
+
+Looking at alignment statistics, we can not expect a complete genome as total genome of about 10.2 million base pairs is divided into 431 fragments. Also, mean coverage of 6x is very low as Flye requires at least 15x to 20x coverage to find overlaps, repeats and construct high quality consensus sequence.
+
+## Evaluating assembly using BUSCO
+
+### BUSCO Scores
+
+C:42.7%\[S:42.7%,D:0.1%\],F:0.7%,M:56.6%,n:3282,E:6.6%
+
+Since Flye mean coverage was 6x, the above given BUSCO score makes sense. Only 42.7% of genes were found in their total length while 56.5% of genome was missing because Flye could not assemble it.Low F (fragmented) score of 0.7% suggests that genes were not truncated, either reads were assembled or missed completely.
+
+### BUSCO N50
+
+Scaffold N50 = 28 kbp Contigs N50 = 28 kbp
+
+The N50 is approximately equal to Flye N50 of 28892
+
+### Total Assembly length
+
+Total assembly length is 10032501
+
+## Evaluating assembly using QUAST
+
+### Genome Fraction
+
+Genome fraction is 4.917%. Genome Fraction is based on the fact that how much of the particular reference genome matches assembly while BUSCO tells how many important genes were recovered
+
+### Duplication ratio
+
+Duplication ratio is 1.017
+
+### Misassemblies
+
+Number of misassemblies is 1 and length of misassembled contigs is 18,084. This suggests that regions of strain assembly that could be aligned to S.cerevisiae reference were structurally consistent with it.
+
+## Data prep
+
+code chunk to extract sequence of chromosome 1
+
+```{bash}
+samtools faidx data/S288C_UCSC.fna chrI > outputs/R64_chr1.fna
+```

@@ -49,10 +49,58 @@ if(length(header_lines) == 17) {
   stop("Error: Chromosome count mismatch! Check your input file.")
 }
 
+# Do in terminal
+
 # Ensure the output directory exists
-# mkdir -p outputs/flye_output
+## mkdir -p outputs/flye_output
 
 # wget -nc -P data/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR153/006/ERR1539006/ERR1539006.fastq.gz
 
 # Run the Flye assembler, note the expected genome size
 # flye --nano-raw data/ERR1539006.fastq.gz --out-dir outputs/flye_output --threads 8 --genome-size 12m
+
+
+# install medaka
+## conda create -n medaka_final -c conda-forge -c bioconda -c nanoporetech medaka python=3.10 -y
+
+# Activate your environment
+## conda activate medaka_final
+
+# Ensure directories exist
+## mkdir -p outputs/medaka_round1 outputs/medaka_round2
+
+# Round 1
+# medaka_consensus -i data/ERR1539006.fastq.gz -d outputs/flye_output/assembly.fasta -o outputs/medaka_round1 -t 8
+
+# Round 2
+# medaka_consensus -i data/ERR1539006.fastq.gz -d outputs/medaka_round1/consensus.fasta -o outputs/medaka_round2 -t 8
+
+
+# Visualizing Alignment
+# BAM file path
+bam_file <- "outputs/alignment.sorted.bam"
+
+# Open connection to BAM file
+bam <- BamFile(bam_file)
+
+# Read all alignments
+alns <- readGAlignments(bam)
+
+# Convert to GRanges object
+gr_alns <- granges(alns)
+
+# Find the start and end boundaries of all mapped contigs combined
+range(gr_alns)
+
+# create track showing alignment
+aln_track <- AnnotationTrack(gr_alns, name = "Contigs", genome = "sacCer3", chromosome = "chrI")
+
+# Add genome axis for scale
+axis_track <- GenomeAxisTrack()
+
+# Plot
+plotTracks(list(axis_track, aln_track),
+           from = min(start(gr_alns)),
+           to = max(end(gr_alns)),
+           main = "Contig Alignments to Chromosome 1")
+
