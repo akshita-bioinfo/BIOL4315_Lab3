@@ -14,6 +14,7 @@ library("GenomicRanges")
 library("Rsamtools")
 library("GenomicAlignments")
 library("Gviz")
+library("Biostrings")
 
 # Download the reference genome from refseq
 # wget -nc -P data/ https://ftp.ncbi.nlm.nih.gov/genomes/refseq/fungi/Saccharomyces_cerevisiae/latest_assembly_versions/GCF_000146045.2_R64/GCF_000146045.2_R64_genomic.fna.gz
@@ -103,4 +104,54 @@ plotTracks(list(axis_track, aln_track),
            from = min(start(gr_alns)),
            to = max(end(gr_alns)),
            main = "Contig Alignments to Chromosome 1")
+
+# Read contigs
+readContigs <- readDNAStringSet("path")
+
+# Find longest contig
+longest <- which.max(width(readContigs))
+
+# Extract longest contig and write to new fasta file
+longest_contig <- readContigs[longest]
+writeXStringSet(longest_contig, "longest_contig.fasta")
+
+
+## Do this is in R terminal 
+
+# gunzip -k data/GCF_000146045.2_R64_cds_from_genomic.fna.gz
+# minimap2 -ax splice -uf --secondary=no outputs/longest_contig.fasta data/GCF_000146045.2_R64_cds_from_genomic.fna > outputs/cds_aln.sam
+
+## code chunk that converts your cds_aln.sam file to a sorted and indexed BAM file for visualization
+# samtools view -bS outputs/cds_aln.sam > outputs/cds_alignment.bam
+# samtools sort outputs/cds_alignmemt.bam -o outputs/cds_aln.sorted.bam
+# samtools index outputs/cds_aln.sorted.bam
+
+## Using your sorted BAM file, create Gviz tracks that represent the aligned CDSs
+# BAM file path
+bam_file <- "outputs/cds_aln.sorted.bam"
+
+# Open connection to BAM file
+bam <- BamFile(bam_file)
+
+# Read all alignments
+alns <- readGAlignments(bam)
+
+# Convert to GRanges object
+gr_alns <- granges(alns)
+
+# Find the start and end boundaries of all mapped contigs combined
+range(gr_alns)
+
+# Create tracks showing alignment
+aln_track <- AnnotationTrack(gr_alns, name = "CDSs", genome = "sacCer3", chromosome = "chrI")
+
+# Add genome axis for scale
+axis_track <- GenomeAxisTrack()
+
+# Visualize the alignment
+# Plot
+plotTracks(list(axis_track, aln_track),
+           from = min(start(gr_alns)),
+           to = max(end(gr_alns)),
+           main = "CDSs Alignments to Chromosome 1")
 
