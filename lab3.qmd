@@ -51,6 +51,7 @@ alignment_statistics
 
 Looking at alignment statistics, we can not expect a complete genome as total genome of about 10.2 million base pairs is divided into 431 fragments. Also, mean coverage of 6x is very low as Flye requires at least 15x to 20x coverage to find overlaps, repeats and construct high quality consensus sequence.
 
+
 ## Evaluating assembly using BUSCO
 
 ### BUSCO Scores
@@ -69,6 +70,7 @@ The N50 is approximately equal to Flye N50 of 28892
 
 Total assembly length is 10032501
 
+
 ## Evaluating assembly using QUAST
 
 ### Genome Fraction
@@ -83,6 +85,7 @@ Duplication ratio is 1.017
 
 Number of misassemblies is 1 and length of misassembled contigs is 18,084. This suggests that regions of strain assembly that could be aligned to S.cerevisiae reference were structurally consistent with it.
 
+
 ## Data prep
 
 code chunk to extract sequence of chromosome 1
@@ -91,15 +94,55 @@ code chunk to extract sequence of chromosome 1
 samtools faidx data/S288C_UCSC.fna chrI > outputs/R64_chr1.fna
 ```
 
+
 ## Visualizing the alignment to chromsome 1 with GRanges
 
-number of contigs aligning to chromosome 1 =
+number of contigs aligning to chromosome 1 = 9
 
-Estimate how much of chromosome 1 does contigs cover: 
-using function range() = 
-using function ranges() =
+Estimate how much of chromosome 1 does contigs cover using function range() and ranges()
 
-Plot
+```{r}
+range(gr_alns)
+```
+
+```{r}
+ranges(gr_alns)
+```
+contigs are distributed over a small portion of the chromosome chr1 while low QUAST Genome Fraction of 4.917% suggests that assembly covers only small portion of the reference genome.
+
+plot
+```{r}
+# BAM file path
+bam_file <- "outputs/alignment.sorted.bam"
+
+# Open connection to BAM file
+bam <- BamFile(bam_file)
+
+# Read all alignments
+alns <- readGAlignments(bam)
+
+# Convert to GRanges object
+gr_alns <- granges(alns)
+
+# Find the start and end boundaries of all mapped contigs combined
+# range(gr_alns)
+
+# Peek at the individual contig boundaries
+ranges(gr_alns)
+
+# create track showing alignment
+aln_track <- AnnotationTrack(gr_alns, name = "Contigs", genome = "sacCer3", chromosome = "chrI")
+
+# Add genome axis for scale
+axis_track <- GenomeAxisTrack()
+
+# Plot
+plotTracks(list(axis_track, aln_track),
+           from = min(start(gr_alns)),
+           to = max(end(gr_alns)),
+           main = "Contig Alignments to Chromosome 1")
+```
+
 
 
 ## Garbing the longest cotig
