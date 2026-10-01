@@ -3,9 +3,8 @@
 .RData
 .Ruserdata
 data/
-outputs/
+outputs/*
 !outputs/longest_contig.fasta
-!outputs/R64-chr1.fna
-!outputs/quast-output/report.html
+!outputs/R64_chr1.fna
+!outputs/quast_output/report.html
 !outputs/flye_output/flye.log
-!outputs/busco_output/run_saccharomycetaceae_obd12/short_summary.text
