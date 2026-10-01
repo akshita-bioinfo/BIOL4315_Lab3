@@ -102,6 +102,75 @@ using function ranges() =
 Plot
 
 
-## Garbing the longest constg
+## Garbing the longest cotig
 
-code chunk that extracts the longest contig
+code chunk to extract the longest contig
+
+```{r}
+# load required packages 
+library(Biostrings)
+
+# Read contigs
+readContigs <- readDNAStringSet("outputs/medaka_round2/consensus.fasta")
+
+# Find longest contig
+longest <- which.max(width(readContigs))
+
+# Extract longest contig 
+longest_contig <- readContigs[longest]
+
+# write to new fasta file
+writeXStringSet(longest_contig, "outputs/longest_contig.fasta")
+```
+
+
+## Aligning CDSs to the longest contig
+
+code chunk that converts cds_aln.sam file to a sorted and indexed BAM file for visualization
+
+```{bash}
+samtools view -bS outputs/cds_aln.sam > outputs/cds_alignment.bam
+samtools sort outputs/cds_alignment.bam -o outputs/cds_aln.sorted.bam
+samtools index outputs/cds_aln.sorted.bam
+```
+
+
+## Visualizing CDSs
+
+```{r}
+# BAM file path
+bam_file1 <- "outputs/cds_aln.sorted.bam"
+
+# Open connection to BAM file
+bam1 <- BamFile(bam_file1)
+
+# Read all alignments
+alns1 <- readGAlignments(bam1)
+
+# Convert to GRanges object
+gr_alns1 <- granges(alns1)
+
+# Find the start and end boundaries of all mapped contigs combined
+range(gr_alns1)
+
+# set to false
+options(ucscChromosomeNames=FALSE)
+
+# Create tracks showing alignment
+aln_track1 <- AlignmentsTrack("outputs/cds_aln.sorted.bam", isPaired = FALSE)
+
+# Add genome axis for scale
+axis_track1 <- GenomeAxisTrack()
+
+# Visualize the alignment
+# Plot
+plotTracks(list(axis_track1, aln_track1),
+           from = min(start(gr_alns1)),
+           to = max(end(gr_alns1)),
+           chromosome = "contig_301",
+           main = "CDSs Alignments to Chromosome 1")
+
+# reset to true
+options(ucscChromosomeNames=TRUE)
+```
+

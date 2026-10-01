@@ -4,3 +4,6 @@
 .Ruserdata
 data/
 outputs/
+
+# Exceptions:
+!outputs/longest_contig.fasta
