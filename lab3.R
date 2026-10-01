@@ -92,6 +92,9 @@ gr_alns <- granges(alns)
 # Find the start and end boundaries of all mapped contigs combined
 range(gr_alns)
 
+# Peek at the individual contig boundaries
+# ranges(gr_alns)
+
 # create track showing alignment
 aln_track <- AnnotationTrack(gr_alns, name = "Contigs", genome = "sacCer3", chromosome = "chrI")
 
@@ -104,3 +107,6 @@ plotTracks(list(axis_track, aln_track),
            to = max(end(gr_alns)),
            main = "Contig Alignments to Chromosome 1")
 
+# Longest contig
+contig_lengths <- seqlengths(gr_alns)
+longest_contig_name <- 

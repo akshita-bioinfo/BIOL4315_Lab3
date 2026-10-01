@@ -90,3 +90,18 @@ code chunk to extract sequence of chromosome 1
 ```{bash}
 samtools faidx data/S288C_UCSC.fna chrI > outputs/R64_chr1.fna
 ```
+
+## Visualizing the alignment to chromsome 1 with GRanges
+
+number of contigs aligning to chromosome 1 =
+
+Estimate how much of chromosome 1 does contigs cover: 
+using function range() = 
+using function ranges() =
+
+Plot
+
+
+## Garbing the longest constg
+
+code chunk that extracts the longest contig
